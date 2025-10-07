@@ -16,9 +16,21 @@ export class UploadService {
   ) {}
 
   async processCsv(file: Express.Multer.File) {
+    this.logger.log(
+      `Begin CSV processing: name=${file.originalname} size=${file.size} mime=${file.mimetype}`,
+    );
+
     const createdClientIds: string[] = [];
-    const skipped: Array<{ row: number; reason: string; raw: any }> = [];
-    const errors: Array<{ row: number; error: string; raw: any }> = [];
+    const skipped: Array<{
+      row: number;
+      reason: string;
+      raw: Record<string, unknown>;
+    }> = [];
+    const errors: Array<{
+      row: number;
+      error: string;
+      raw: Record<string, unknown>;
+    }> = [];
 
     const requiredFields = [
       'name',
@@ -29,16 +41,31 @@ export class UploadService {
       'country',
     ];
 
-    const rows: any[] = [];
+    const rows: Record<string, unknown>[] = [];
 
     await new Promise<void>((resolve, reject) => {
-      const stream = csv();
-      stream
-        .on('data', (data) => rows.push(data))
-        .on('end', () => resolve())
-        .on('error', (err) => reject(err));
+      // Detect delimiter by sampling first kilobyte: use ';' if present, else default ','
+      const sample = file.buffer
+        .subarray(0, Math.min(file.buffer.length, 1024))
+        .toString('utf8');
+      const detectedDelimiter =
+        sample.includes(';') && !sample.includes(',;') ? ';' : ',';
+      this.logger.log(`CSV delimiter detected: "${detectedDelimiter}"`);
 
-      // Feed the buffer to the parser
+      const stream = csv({ separator: detectedDelimiter });
+      stream
+        .on('data', (data: Record<string, unknown>) => {
+          rows.push(data);
+        })
+        .on('end', () => {
+          this.logger.log(`CSV parsed rows=${rows.length}`);
+          resolve();
+        })
+        .on('error', (err: Error) => {
+          this.logger.error('CSV parse error', err);
+          reject(err);
+        });
+
       stream.write(file.buffer);
       stream.end();
     });
@@ -48,13 +75,20 @@ export class UploadService {
       rowIndex += 1;
 
       const normalized = this.normalizeRow(row);
-      const missing = requiredFields.filter((f) => !normalized[f]);
+      const missing = requiredFields.filter(
+        (f) => !normalized[f] || normalized[f].trim() === '',
+      );
       if (missing.length > 0) {
         skipped.push({
           row: rowIndex,
           reason: `Missing fields: ${missing.join(', ')}`,
           raw: row,
         });
+        this.logger.warn(
+          `Row ${rowIndex} skipped: missing=${missing.join(', ')} rawKeys=${Object.keys(
+            row,
+          ).join(',')}`,
+        );
         continue;
       }
 
@@ -70,20 +104,20 @@ export class UploadService {
         });
         const saved = await this.clientRepository.save(client);
         createdClientIds.push(saved.id);
+        this.logger.log(`Row ${rowIndex} created clientId=${saved.id}`);
       } catch (e) {
         this.logger.error('Error saving client from CSV', e as Error);
         errors.push({ row: rowIndex, error: (e as Error).message, raw: row });
       }
     }
 
-    // Geocode created clients in sequence with 1s delay
     try {
       await this.geocodingService.geocodeMultipleClients(createdClientIds);
     } catch (e) {
       this.logger.error('Error during batch geocoding', e as Error);
     }
 
-    return {
+    const summary = {
       created: createdClientIds.length,
       skipped: skipped.length,
       errors: errors.length,
@@ -91,29 +125,70 @@ export class UploadService {
       skippedDetails: skipped,
       errorDetails: errors,
     };
+    this.logger.log(
+      `CSV processing finished: created=${summary.created} skipped=${summary.skipped} errors=${summary.errors}`,
+    );
+    return summary;
   }
 
-  private normalizeRow(row: Record<string, any>) {
+  private normalizeRow(row: Record<string, unknown>): Record<string, string> {
+    const normalizeKey = (key: string): string =>
+      key
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    const normalizedRow: Record<string, unknown> = {};
+    for (const [rawKey, rawValue] of Object.entries(row)) {
+      if (!rawKey) continue;
+      const nk = normalizeKey(rawKey);
+      if (!nk) continue;
+      normalizedRow[nk] = rawValue;
+    }
+
     const get = (keyVariants: string[]) => {
       for (const k of keyVariants) {
-        if (
-          row[k] !== undefined &&
-          row[k] !== null &&
-          String(row[k]).trim() !== ''
-        ) {
-          return String(row[k]).trim();
+        const nk = normalizeKey(k);
+        const value = normalizedRow[nk];
+        if (typeof value === 'string') {
+          const trimmed = value.trim();
+          if (trimmed !== '') return trimmed;
+        } else if (typeof value === 'number') {
+          return String(value);
+        } else if (typeof value === 'boolean') {
+          return value ? 'true' : 'false';
         }
       }
       return '';
     };
 
+    // Split "Cliente" into name/lastName if provided as full name
+    const fullClient = get(['Cliente', 'cliente']);
+    let nameFromFull = '';
+    let lastFromFull = '';
+    if (fullClient) {
+      const parts = fullClient.split(' ').filter((p) => p.trim() !== '');
+      if (parts.length >= 2) {
+        nameFromFull = parts[0];
+        lastFromFull = parts.slice(1).join(' ');
+      } else if (parts.length === 1) {
+        nameFromFull = parts[0];
+      }
+    }
+
+    const streetFromCombined = get(['Calle y altura', 'calle y altura']);
+
     return {
-      name: get(['name', 'Nombre', 'nombre', 'firstName']),
-      lastName: get(['lastName', 'Apellido', 'apellido', 'surname']),
-      street: get(['street', 'calle', 'direccion', 'address', 'addr']),
-      city: get(['city', 'ciudad', 'localidad']),
-      province: get(['province', 'provincia', 'state']),
-      country: get(['country', 'pais']),
-    } as const;
+      name: get(['name', 'Nombre', 'nombre', 'firstName']) || nameFromFull,
+      lastName:
+        get(['lastName', 'Apellido', 'apellido', 'surname']) || lastFromFull,
+      street:
+        get(['street', 'calle', 'direccion', 'address', 'addr']) ||
+        streetFromCombined,
+      city: get(['city', 'Ciudad', 'ciudad', 'localidad']),
+      province: get(['province', 'Provincia', 'provincia', 'state']),
+      country: get(['country', 'Pais', 'país', 'pais']),
+    };
   }
 }

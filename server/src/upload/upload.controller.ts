@@ -1,59 +1,45 @@
 import {
+  BadRequestException,
   Controller,
-  Get,
+  Logger,
   Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
   UploadedFile,
   UseInterceptors,
-  ParseFilePipe,
-  FileTypeValidator,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import { CreateUploadDto } from './dto/create-upload.dto';
-import { UpdateUploadDto } from './dto/update-upload.dto';
+import type { Request } from 'express';
 
 @Controller('upload')
 export class UploadController {
+  private readonly logger = new Logger(UploadController.name);
+
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('csv')
   @UseInterceptors(FileInterceptor('file'))
   async uploadCsv(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({
-            fileType: /text\/csv|application\/vnd\.ms-excel/,
-          }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Req() req: Request,
   ) {
-    return this.uploadService.processCsv(file);
-  }
+    this.logger.log(
+      `Incoming upload: content-type=${req.headers['content-type']}; field="file"; hasFile=${!!file}`,
+    );
 
-  @Get()
-  findAll() {
-    return this.uploadService.findAll();
-  }
+    if (!file) {
+      this.logger.error(
+        'No file received. Ensure Body is form-data and key name is "file".',
+      );
+      throw new BadRequestException(
+        'Field "file" missing. Use form-data with key "file" and a CSV file.',
+      );
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.uploadService.findOne(+id);
-  }
+    this.logger.log(
+      `Received file name=${file.originalname} size=${file.size} mime=${file.mimetype}`,
+    );
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUploadDto: UpdateUploadDto) {
-    return this.uploadService.update(+id, updateUploadDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.uploadService.remove(+id);
+    return await this.uploadService.processCsv(file);
   }
 }
