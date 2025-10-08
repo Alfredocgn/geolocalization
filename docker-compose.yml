@@ -34,6 +34,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost,http://localhost:80}
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_NAME: ${DATABASE_NAME:-geochallenge}
