@@ -149,7 +149,7 @@ export const ClientForm: React.FC<ClientFormProps> = ({
           loading={loading}
           disabled={loading}
         >
-          {client ? "Update" : "Create"} Client
+          {client ? "Update Client" : "Create Client"}
         </Button>
 
         <Button

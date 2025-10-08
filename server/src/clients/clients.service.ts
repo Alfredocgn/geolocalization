@@ -6,15 +6,6 @@ import { Client } from './entities/client.entity';
 import { Repository } from 'typeorm';
 import { GeocodingService } from 'src/geocoding/geocoding.service';
 
-interface GeocodingResult {
-  latitude: number;
-  longitude: number;
-  display_name: string;
-  confidence: number;
-  manual_selection?: boolean;
-  selected_from?: number;
-}
-
 @Injectable()
 export class ClientsService {
   constructor(
@@ -52,8 +43,13 @@ export class ClientsService {
   }
 
   async update(id: string, updateClientDto: UpdateClientDto): Promise<Client> {
+    console.log('📝 ClientsService.update called');
+    console.log('ID:', id);
+    console.log('Update DTO:', updateClientDto);
     await this.clientRepository.update(id, updateClientDto);
-    return await this.findOne(id);
+    const updated = await this.findOne(id);
+    console.log('Updated client:', updated);
+    return updated;
   }
 
   async remove(id: string): Promise<void> {
@@ -78,6 +74,8 @@ export class ClientsService {
   async updateAddressAndGeocode(
     id: string,
     addressDto: {
+      name?: string;
+      lastName?: string;
       street?: string;
       city?: string;
       province?: string;
@@ -120,17 +118,10 @@ export class ClientsService {
       throw new Error('Client does not have ambiguous geocoding results');
     }
 
-    let results: GeocodingResult[];
-    try {
-      const parsedResults: unknown = JSON.parse(client.geocodingResults);
-      if (!Array.isArray(parsedResults)) {
-        throw new Error('Geocoding results is not an array');
-      }
-      results = parsedResults as GeocodingResult[];
-    } catch (error) {
-      console.error('Error parsing geocoding results:', error);
-      throw new Error('Invalid geocoding results format');
+    if (!Array.isArray(client.geocodingResults)) {
+      throw new Error('Geocoding results is not an array');
     }
+    const results = client.geocodingResults;
 
     if (resultIndex >= results.length || resultIndex < 0) {
       throw new Error('Invalid result index');
@@ -142,12 +133,8 @@ export class ClientsService {
       latitude: selectedResult.latitude,
       longitude: selectedResult.longitude,
       geocodingStatus: 'success',
-      geocodingResults: JSON.stringify({
-        ...selectedResult,
-        manual_selection: true,
-        selected_from: results.length,
-      } as GeocodingResult),
-      notes: `Manually selected from ${results.length} options`,
+      geocodingResults: selectedResult,
+      notes: `Manually selected from ${results.length} options (index: ${resultIndex})`,
     };
 
     await this.clientRepository.update(id, updateData);

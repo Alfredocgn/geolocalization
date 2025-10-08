@@ -1,15 +1,15 @@
 import {
-  BadRequestException,
   Controller,
-  Logger,
   Post,
   UploadedFile,
   UseInterceptors,
-  Req,
+  Get,
+  Param,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import type { Request } from 'express';
 
 @Controller('upload')
 export class UploadController {
@@ -19,27 +19,34 @@ export class UploadController {
 
   @Post('csv')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadCsv(
-    @UploadedFile() file: Express.Multer.File | undefined,
-    @Req() req: Request,
-  ) {
-    this.logger.log(
-      `Incoming upload: content-type=${req.headers['content-type']}; field="file"; hasFile=${!!file}`,
-    );
-
+  uploadCsv(@UploadedFile() file: Express.Multer.File | undefined) {
     if (!file) {
-      this.logger.error(
-        'No file received. Ensure Body is form-data and key name is "file".',
-      );
+      this.logger.error('No file received in upload request');
       throw new BadRequestException(
         'Field "file" missing. Use form-data with key "file" and a CSV file.',
       );
     }
 
     this.logger.log(
-      `Received file name=${file.originalname} size=${file.size} mime=${file.mimetype}`,
+      `Received file: name=${file.originalname} size=${file.size} mime=${file.mimetype}`,
     );
 
-    return await this.uploadService.processCsv(file);
+    return this.uploadService.processCsv(file);
+  }
+
+  @Get('progress/:uploadId')
+  getUploadProgress(@Param('uploadId') uploadId: string) {
+    const progress = this.uploadService.getUploadProgress(uploadId);
+
+    if (!progress) {
+      throw new BadRequestException(`Upload ${uploadId} not found`);
+    }
+
+    return progress;
+  }
+
+  @Get('progress')
+  async getGeocodingProgress() {
+    return await this.uploadService.getGeocodingProgress();
   }
 }

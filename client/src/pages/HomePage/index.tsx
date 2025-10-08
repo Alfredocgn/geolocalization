@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type {
   Client,
   CreateClientDto,
@@ -13,11 +13,13 @@ import { FileUpload } from "../../components/upload/FileUpload";
 import { Button } from "../../components/common/Button";
 import { LoadingSpinner } from "../../components/common/LoadingSpinner";
 import { ErrorAlert } from "../../components/common/ErrorAlert";
+import { UploadProgress } from "../../components/upload/UploadProgress";
 
 export const HomePage: React.FC = () => {
   const [showClientForm, setShowClientForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [currentUploadId, setCurrentUploadId] = useState<string | null>(null);
 
   const {
     clients,
@@ -26,11 +28,14 @@ export const HomePage: React.FC = () => {
     createClient,
     updateClient,
     deleteClient,
-
     updateAddress,
     loadClients,
     selectGeocodingResult,
   } = useClients();
+
+  const handleProgressComplete = () => {
+    loadClients();
+  };
 
   const {
     uploading,
@@ -39,6 +44,11 @@ export const HomePage: React.FC = () => {
     uploadFile,
     clearResult,
   } = useFileUpload();
+
+  const loadClientsRef = useRef(loadClients);
+  useEffect(() => {
+    loadClientsRef.current = loadClients;
+  }, [loadClients]);
 
   const handleCreateClient = async (clientData: CreateClientDto) => {
     try {
@@ -63,7 +73,28 @@ export const HomePage: React.FC = () => {
     if (!editingClient) return;
 
     try {
-      await updateClient(editingClient.id, clientData);
+      const addressChanged =
+        clientData.street !== editingClient.street ||
+        clientData.city !== editingClient.city ||
+        clientData.province !== editingClient.province ||
+        clientData.country !== editingClient.country;
+
+      if (addressChanged) {
+        // Si cambió la dirección, usar updateAddress (que ahora acepta todos los campos)
+        await updateAddress(editingClient.id, {
+          name: clientData.name,
+          lastName: clientData.lastName,
+          street: clientData.street,
+          city: clientData.city,
+          province: clientData.province,
+          country: clientData.country,
+        });
+      } else {
+        // Si solo cambiaron datos personales, usar update normal
+        await updateClient(editingClient.id, clientData);
+      }
+
+      setShowClientForm(false);
       setEditingClient(null);
     } catch (error) {
       console.error("Error updating client:", error);
@@ -82,7 +113,8 @@ export const HomePage: React.FC = () => {
 
   const handleUpdateAddress = async (id: string, address: UpdateAddressDto) => {
     try {
-      await updateAddress(id, address);
+      const response = await updateAddress(id, address);
+      console.log("Response:", response);
     } catch (error) {
       console.error("Error updating address:", error);
     }
@@ -90,13 +122,28 @@ export const HomePage: React.FC = () => {
 
   const handleFileUpload = async (file: File) => {
     try {
-      await uploadFile(file);
+      const result = await uploadFile(file);
+
+      console.log("Upload result:", result); // Para debug
+
+      if (result?.uploadId) {
+        setCurrentUploadId(result.uploadId);
+      }
 
       loadClients();
     } catch (error) {
       console.error("Error uploading file:", error);
     }
   };
+  useEffect(() => {
+    if (!currentUploadId) return;
+
+    const interval = setInterval(() => {
+      loadClientsRef.current();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentUploadId]);
 
   const clientsWithIssues = clients.filter(
     (client) =>
@@ -209,6 +256,13 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+        {currentUploadId && (
+          <UploadProgress
+            uploadId={currentUploadId}
+            onComplete={handleProgressComplete}
+            onClose={() => setCurrentUploadId(null)}
+          />
         )}
 
         {/* Error Messages */}

@@ -9,7 +9,7 @@ export interface Client {
   latitude?: number;
   longitude?: number;
   geocodingStatus: "pending" | "success" | "ambiguous" | "failed";
-  geocodingResults?: string | null;
+  geocodingResults?: GeocodingResult | GeocodingResult[] | null;
   notes?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -45,6 +45,8 @@ export interface GeocodingResponse {
 }
 
 export interface UpdateAddressDto {
+  name?: string;
+  lastName?: string;
   street?: string;
   city?: string;
   province?: string;
@@ -57,10 +59,12 @@ export interface SelectGeocodingResultDto {
 }
 
 export interface CsvUploadResponse {
+  uploadId: string;
   message: string;
-  processed: number;
-  successful: number;
-  failed: number;
+  tracking?: string;
+  processed?: number;
+  successful?: number;
+  failed?: number;
   errors?: string[];
 }
 

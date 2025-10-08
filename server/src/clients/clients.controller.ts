@@ -26,6 +26,11 @@ export class ClientsController {
     return this.clientsService.findAll();
   }
 
+  @Get('issues')
+  findWithGeocodingIssues() {
+    return this.clientsService.findWithGeocodingIssues();
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.clientsService.findOne(id);
@@ -36,17 +41,15 @@ export class ClientsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateClientDto: UpdateClientDto,
   ) {
+    console.log('🔧 PATCH /clients/:id called');
+    console.log('ID:', id);
+    console.log('Update DTO:', updateClientDto);
     return this.clientsService.update(id, updateClientDto);
   }
 
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.clientsService.remove(id);
-  }
-
-  @Get('issues')
-  findWithGeocodingIssues() {
-    return this.clientsService.findWithGeocodingIssues();
   }
 
   @Post(':id/geocode')
@@ -58,6 +61,8 @@ export class ClientsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body()
     addressDto: {
+      name?: string;
+      lastName?: string;
       street?: string;
       city?: string;
       province?: string;

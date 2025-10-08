@@ -1,0 +1,147 @@
+.upload-progress-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.upload-progress-card.error {
+  border: 2px solid #ef4444;
+}
+
+.upload-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.upload-progress-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.upload-progress-header button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.status-badge[data-status="processing"] {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge[data-status="geocoding"] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge[data-status="completed"] {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge[data-status="failed"] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.progress-section {
+  margin-bottom: 20px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  transition: width 0.3s ease;
+}
+
+.progress-fill.geocoding {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.progress-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.stat-success {
+  color: #059669;
+}
+.stat-warning {
+  color: #d97706;
+}
+.stat-error {
+  color: #dc2626;
+}
+
+.time-estimate {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #666;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.error-message {
+  color: #dc2626;
+  margin: 0;
+}

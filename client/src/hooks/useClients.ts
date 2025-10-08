@@ -45,15 +45,20 @@ export const useClients = () => {
 
   const updateClient = useCallback(
     async (id: string, clientData: UpdateClientDto) => {
+      console.log("🚀 useClients.updateClient called");
+      console.log("ID:", id);
+      console.log("Client Data:", clientData);
       setLoading(true);
       setError(null);
       try {
         const updatedClient = await clientsService.update(id, clientData);
+        console.log("✅ Response from API:", updatedClient);
         setClients((prev) =>
           prev.map((client) => (client.id === id ? updatedClient : client))
         );
         return updatedClient;
       } catch (error) {
+        console.error("❌ Error updating client:", error);
         setError(
           error instanceof Error ? error.message : "Error updating client"
         );

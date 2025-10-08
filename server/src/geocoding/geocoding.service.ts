@@ -3,27 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import axios, { AxiosError } from 'axios';
 import { Client } from '../clients/entities/client.entity';
-
-interface NominatimResult {
-  lat: string;
-  lon: string;
-  display_name: string;
-  importance?: number;
-  place_id?: string;
-  osm_type?: string;
-  osm_id?: string;
-  type?: string;
-  class?: string;
-}
-
-interface GeocodingResult {
-  latitude: number;
-  longitude: number;
-  display_name: string;
-  confidence: number;
-}
-
-type GeocodingStatus = 'pending' | 'success' | 'ambiguous' | 'failed';
+import { GeocodingResult, GeocodingStatus, NominatimResult } from './types';
 
 @Injectable()
 export class GeocodingService {
@@ -146,7 +126,7 @@ export class GeocodingService {
   ): Promise<void> {
     const updateData: Partial<Client> = {
       geocodingStatus: status,
-      geocodingResults: results ? JSON.stringify(results) : null,
+      geocodingResults: results || null,
     };
 
     if (status === 'success' && results && !Array.isArray(results)) {

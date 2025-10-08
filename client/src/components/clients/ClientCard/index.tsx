@@ -17,7 +17,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   client,
   onEdit,
   onDelete,
-
   onUpdateAddress,
   onSelectGeocodingResult,
 }) => {
@@ -84,37 +83,50 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         </div>
       )}
 
-      <div className="flex justify-center flex-row gap-2 text-sm mt-auto">
-        <Button variant="secondary" size="xs" onClick={() => onEdit(client)}>
-          Edit
-        </Button>
-
-        {client.geocodingStatus === "ambiguous" && (
-          <Button
-            variant="secondary"
-            size="xs"
-            onClick={() => setShowGeocodingOptions(!showGeocodingOptions)}
-          >
-            {showGeocodingOptions ? "Hide Options" : "Show Options"}
-          </Button>
-        )}
-
-        {client.geocodingStatus === "ambiguous" && (
-          <Button
-            variant="secondary"
-            size="xs"
-            onClick={() => setShowAddressForm(!showAddressForm)}
-          >
-            Fix Address
-          </Button>
-        )}
-
+      <div className="flex flex-wrap justify-center gap-2 mt-auto">
         <Button
           variant="secondary"
           size="xs"
-          onClick={() => onDelete(client.id)}
+          onClick={() => onEdit(client)}
+          className="flex-1 min-w-[80px]"
         >
-          Delete
+          ✏️ Edit
+        </Button>
+
+        {client.geocodingStatus === "ambiguous" && (
+          <>
+            <Button
+              variant="secondary"
+              size="xs"
+              onClick={() => setShowGeocodingOptions(!showGeocodingOptions)}
+              className="flex-1 min-w-[100px]"
+            >
+              {showGeocodingOptions ? "🔼 Hide" : "🔽 Options"}
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="xs"
+              onClick={() => setShowAddressForm(!showAddressForm)}
+              className="flex-1 min-w-[100px]"
+            >
+              📍 Fix Address
+            </Button>
+          </>
+        )}
+
+        {(client.geocodingStatus === "failed" ||
+          client.geocodingStatus === "ambiguous") && (
+          <div className="w-full h-0"></div>
+        )}
+
+        <Button
+          variant="danger"
+          size="xs"
+          onClick={() => onDelete(client.id)}
+          className="flex-1 min-w-[80px]"
+        >
+          🗑️ Delete
         </Button>
       </div>
 
