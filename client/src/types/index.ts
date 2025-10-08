@@ -60,6 +60,10 @@ export interface CsvUploadResponse {
   uploadId: string;
   message: string;
   tracking?: string;
+  processed?: number;
+  successful?: number;
+  failed?: number;
+  errors?: string[];
 }
 
 export interface AppState {

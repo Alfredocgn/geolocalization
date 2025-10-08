@@ -5,20 +5,7 @@ import { Client } from 'src/clients/entities/client.entity';
 import { GeocodingService } from 'src/geocoding/geocoding.service';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
-
-export interface UploadProgress {
-  uploadId: string;
-  totalRows: number;
-  processedRows: number;
-  createdClients: number;
-  skipped: number;
-  errors: number;
-  status: 'processing' | 'geocoding' | 'completed' | 'failed';
-  geocodingProgress: {
-    total: number;
-    completed: number;
-  };
-}
+import { UploadProgress } from './types';
 
 @Injectable()
 export class UploadService {

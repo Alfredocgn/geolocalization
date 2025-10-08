@@ -17,7 +17,6 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   client,
   onEdit,
   onDelete,
-
   onUpdateAddress,
   onSelectGeocodingResult,
 }) => {

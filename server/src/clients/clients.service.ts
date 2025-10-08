@@ -5,15 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Client } from './entities/client.entity';
 import { Repository } from 'typeorm';
 import { GeocodingService } from 'src/geocoding/geocoding.service';
-
-interface GeocodingResult {
-  latitude: number;
-  longitude: number;
-  display_name: string;
-  confidence: number;
-  manual_selection?: boolean;
-  selected_from?: number;
-}
+import { GeocodingResult } from 'src/geocoding/types';
 
 @Injectable()
 export class ClientsService {
