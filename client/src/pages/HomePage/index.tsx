@@ -73,7 +73,28 @@ export const HomePage: React.FC = () => {
     if (!editingClient) return;
 
     try {
-      await updateClient(editingClient.id, clientData);
+      const addressChanged =
+        clientData.street !== editingClient.street ||
+        clientData.city !== editingClient.city ||
+        clientData.province !== editingClient.province ||
+        clientData.country !== editingClient.country;
+
+      if (addressChanged) {
+        // Si cambió la dirección, usar updateAddress (que ahora acepta todos los campos)
+        await updateAddress(editingClient.id, {
+          name: clientData.name,
+          lastName: clientData.lastName,
+          street: clientData.street,
+          city: clientData.city,
+          province: clientData.province,
+          country: clientData.country,
+        });
+      } else {
+        // Si solo cambiaron datos personales, usar update normal
+        await updateClient(editingClient.id, clientData);
+      }
+
+      setShowClientForm(false);
       setEditingClient(null);
     } catch (error) {
       console.error("Error updating client:", error);
@@ -92,7 +113,8 @@ export const HomePage: React.FC = () => {
 
   const handleUpdateAddress = async (id: string, address: UpdateAddressDto) => {
     try {
-      await updateAddress(id, address);
+      const response = await updateAddress(id, address);
+      console.log("Response:", response);
     } catch (error) {
       console.error("Error updating address:", error);
     }

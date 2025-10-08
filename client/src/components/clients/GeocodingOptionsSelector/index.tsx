@@ -14,19 +14,16 @@ export const GeocodingOptionsSelector: React.FC<
 > = ({ client, onSelectResult, loading = false }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  const parseGeocodingResults = (): GeocodingResult[] => {
+  const getGeocodingResults = (): GeocodingResult[] => {
     if (!client.geocodingResults) return [];
 
-    try {
-      const parsed = JSON.parse(client.geocodingResults);
-      return Array.isArray(parsed) ? parsed : [parsed];
-    } catch (error) {
-      console.error("Error parsing geocoding results:", error);
-      return [];
-    }
+    // Con JSONB, el backend ya devuelve el objeto deserializado
+    return Array.isArray(client.geocodingResults)
+      ? client.geocodingResults
+      : [client.geocodingResults];
   };
 
-  const results = parseGeocodingResults();
+  const results = getGeocodingResults();
 
   const handleSelect = () => {
     if (selectedIndex !== null) {

@@ -126,7 +126,7 @@ export class GeocodingService {
   ): Promise<void> {
     const updateData: Partial<Client> = {
       geocodingStatus: status,
-      geocodingResults: results ? JSON.stringify(results) : null,
+      geocodingResults: results || null,
     };
 
     if (status === 'success' && results && !Array.isArray(results)) {

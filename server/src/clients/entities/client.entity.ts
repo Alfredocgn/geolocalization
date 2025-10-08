@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { GeocodingResult } from '../../geocoding/types';
 
 @Entity('client')
 export class Client {
@@ -42,8 +43,8 @@ export class Client {
   })
   geocodingStatus: 'pending' | 'success' | 'ambiguous' | 'failed';
 
-  @Column({ type: 'text', nullable: true })
-  geocodingResults: string | null;
+  @Column({ type: 'jsonb', nullable: true })
+  geocodingResults: GeocodingResult | GeocodingResult[] | null;
 
   @Column({ type: 'text', nullable: true })
   notes: string | null;
