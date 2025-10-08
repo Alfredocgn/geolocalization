@@ -57,11 +57,9 @@ export interface SelectGeocodingResultDto {
 }
 
 export interface CsvUploadResponse {
+  uploadId: string;
   message: string;
-  processed: number;
-  successful: number;
-  failed: number;
-  errors?: string[];
+  tracking?: string;
 }
 
 export interface AppState {
