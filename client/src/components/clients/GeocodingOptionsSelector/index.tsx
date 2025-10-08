@@ -94,7 +94,7 @@ export const GeocodingOptionsSelector: React.FC<
         ))}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 text-xs">
         <Button
           onClick={handleSelect}
           variant="secondary"

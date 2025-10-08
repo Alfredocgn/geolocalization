@@ -9,7 +9,6 @@ interface ClientCardProps {
   client: Client;
   onEdit: (client: Client) => void;
   onDelete: (id: string) => void;
-  onGeocode: (id: string) => void;
   onUpdateAddress: (id: string, address: UpdateAddressDto) => void;
   onSelectGeocodingResult: (id: string, resultIndex: number) => void;
 }
@@ -18,7 +17,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   client,
   onEdit,
   onDelete,
-  onGeocode,
+
   onUpdateAddress,
   onSelectGeocodingResult,
 }) => {
@@ -46,7 +45,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-black">
             {client.name} {client.lastName}
           </h3>
           <p className="text-sm text-gray-600">
@@ -56,8 +55,8 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         <GeocodingStatusBadge status={client.geocodingStatus} />
       </div>
 
-      <div className="space-y-2 mb-4">
-        <p className="text-sm">
+      <div className="space-y-2 mb-4 text-black">
+        <p className="text-sm ">
           <span className="font-medium">Address:</span> {client.street}
         </p>
         <p className="text-sm">
@@ -85,22 +84,15 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" size="small" onClick={() => onEdit(client)}>
+      <div className="flex justify-center flex-row gap-2 text-xs">
+        <Button variant="secondary" size="xs" onClick={() => onEdit(client)}>
           Edit
         </Button>
 
-        <Button
-          variant="secondary"
-          size="small"
-          onClick={() => onGeocode(client.id)}
-        >
-          Geocode
-        </Button>
         {client.geocodingStatus === "ambiguous" && (
           <Button
             variant="secondary"
-            size="small"
+            size="xs"
             onClick={() => setShowGeocodingOptions(!showGeocodingOptions)}
           >
             {showGeocodingOptions ? "Hide Options" : "Show Options"}
@@ -110,7 +102,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         {client.geocodingStatus === "ambiguous" && (
           <Button
             variant="secondary"
-            size="small"
+            size="xs"
             onClick={() => setShowAddressForm(!showAddressForm)}
           >
             Fix Address
@@ -119,7 +111,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
 
         <Button
           variant="secondary"
-          size="small"
+          size="xs"
           onClick={() => onDelete(client.id)}
         >
           Delete
@@ -134,7 +126,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
           <h4 className="font-medium mb-3">Fix Address</h4>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-black mb-1">
                 Street and Height
               </label>
               <input
@@ -146,14 +138,14 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                     street: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-black px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-black mb-1">
                   City
                 </label>
                 <input
@@ -165,13 +157,13 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                       city: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-black px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-black mb-1">
                   Province
                 </label>
                 <input
@@ -183,14 +175,14 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                       province: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-black px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-black mb-1">
                 Country
               </label>
               <input
@@ -202,13 +194,13 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                     country: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 text-black py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-black mb-1">
                 Notes (optional)
               </label>
               <textarea
@@ -217,12 +209,12 @@ export const ClientCard: React.FC<ClientCardProps> = ({
                   setAddressForm((prev) => ({ ...prev, notes: e.target.value }))
                 }
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-black px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-4 text-xs">
             <Button type="submit" variant="secondary" size="small">
               Save
             </Button>

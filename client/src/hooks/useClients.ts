@@ -78,25 +78,6 @@ export const useClients = () => {
     }
   }, []);
 
-  const geocodeClient = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const updatedClient = await clientsService.geocode(id);
-      setClients((prev) =>
-        prev.map((client) => (client.id === id ? updatedClient : client))
-      );
-      return updatedClient;
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Error al geocodificar cliente"
-      );
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const updateAddress = useCallback(
     async (id: string, addressData: UpdateAddressDto) => {
       setLoading(true);
@@ -159,7 +140,7 @@ export const useClients = () => {
     createClient,
     updateClient,
     deleteClient,
-    geocodeClient,
+
     updateAddress,
     selectGeocodingResult,
   };

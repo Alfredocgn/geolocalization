@@ -26,7 +26,7 @@ export const HomePage: React.FC = () => {
     createClient,
     updateClient,
     deleteClient,
-    geocodeClient,
+
     updateAddress,
     loadClients,
     selectGeocodingResult,
@@ -80,14 +80,6 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  const handleGeocodeClient = async (id: string) => {
-    try {
-      await geocodeClient(id);
-    } catch (error) {
-      console.error("Error geocoding client:", error);
-    }
-  };
-
   const handleUpdateAddress = async (id: string, address: UpdateAddressDto) => {
     try {
       await updateAddress(id, address);
@@ -126,7 +118,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mb-6 flex flex-wrap justify-center items-center">
+        <div className="mb-6 flex flex-wrap justify-center items-center gap-4">
           <Button onClick={() => setShowClientForm(true)} variant="secondary">
             + New Client
           </Button>
@@ -238,7 +230,6 @@ export const HomePage: React.FC = () => {
                     setShowClientForm(true);
                   }}
                   onDelete={handleDeleteClient}
-                  onGeocode={handleGeocodeClient}
                   onUpdateAddress={handleUpdateAddress}
                   onSelectGeocodingResult={handleSelectGeocodingResult}
                 />
@@ -306,7 +297,6 @@ export const HomePage: React.FC = () => {
                     setShowClientForm(true);
                   }}
                   onDelete={handleDeleteClient}
-                  onGeocode={handleGeocodeClient}
                   onUpdateAddress={handleUpdateAddress}
                   onSelectGeocodingResult={handleSelectGeocodingResult}
                 />
