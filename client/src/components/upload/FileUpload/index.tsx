@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { ErrorAlert } from "../../common/ErrorAlert";
+import { LoadingSpinner } from "../../common/LoadingSpinner";
 import type { CsvUploadResponse } from "../../../types";
 
 interface FileUploadProps {
@@ -46,7 +47,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     <div className="space-y-4">
       <div className="text-center">
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Upload Clients from CSV
+          Load Clients from CSV
         </h3>
         <p className="text-sm text-gray-600 mb-4">
           Drag and drop a CSV file or click to select
@@ -63,29 +64,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onDragOver={handleDragOver}
         onClick={!loading ? openFileDialog : undefined}
       >
-        <div className="space-y-4">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            stroke="currentColor"
-            fill="none"
-            viewBox="0 0 48 48"
-          >
-            <path
-              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        {loading ? (
+          <div className="space-y-4">
+            <LoadingSpinner size="large" text="Processing CSV file..." />
+            <p className="text-sm text-blue-600">
+              This may take a few moments. The addresses are being geocoded...
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              stroke="currentColor"
+              fill="none"
+              viewBox="0 0 48 48"
+            >
+              <path
+                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
 
-          {loading ? (
-            <div>
-              <p className="text-blue-600 font-medium">Processing file...</p>
-              <p className="text-sm text-gray-500 mt-1">
-                This may take a few moments
-              </p>
-            </div>
-          ) : (
             <div>
               <p className="text-gray-600">
                 <span className="font-medium text-blue-600">
@@ -97,8 +98,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 Only CSV files (maximum 10MB)
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <input
           ref={fileInputRef}
@@ -132,13 +133,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800">
-                Load Completed
+                Upload Complete
               </h3>
               <div className="mt-2 text-sm text-green-700">
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Files Processed: {uploadResult.processed}</li>
+                  <li>Records processed: {uploadResult.processed}</li>
                   <li>
-                    Clientes created successfully: {uploadResult.successful}
+                    Clients created successfully: {uploadResult.successful}
                   </li>
                   <li>Errors found: {uploadResult.failed}</li>
                 </ul>
@@ -157,9 +158,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             <div className="ml-auto pl-3">
               <button
                 onClick={onClearResult}
-                className="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600"
+                className="inline-flex rounded-md p-1.5 hover:bg-green-100 text-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-green-50 focus:ring-green-600 transition-colors"
               >
-                <span className="sr-only">Dismiss</span>
+                <span className="sr-only">Close</span>
                 <svg
                   className="h-5 w-5"
                   viewBox="0 0 20 20"

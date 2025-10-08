@@ -42,7 +42,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex flex-col h-full">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-lg font-semibold text-black">
@@ -55,7 +55,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         <GeocodingStatusBadge status={client.geocodingStatus} />
       </div>
 
-      <div className="space-y-2 mb-4 text-black">
+      <div className="space-y-2 mb-4 text-black flex-grow">
         <p className="text-sm ">
           <span className="font-medium">Address:</span> {client.street}
         </p>
@@ -84,7 +84,7 @@ export const ClientCard: React.FC<ClientCardProps> = ({
         </div>
       )}
 
-      <div className="flex justify-center flex-row gap-2 text-xs">
+      <div className="flex justify-center flex-row gap-2 text-sm mt-auto">
         <Button variant="secondary" size="xs" onClick={() => onEdit(client)}>
           Edit
         </Button>

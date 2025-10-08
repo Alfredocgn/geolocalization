@@ -181,10 +181,10 @@ export const HomePage: React.FC = () => {
                       setShowUploadForm(false);
                       clearResult();
                     }}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-white hover:text-gray-600"
                   >
                     <svg
-                      className="w-6 h-6"
+                      className="w-3 h-3"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
