@@ -155,11 +155,11 @@ export const HomePage: React.FC = () => {
     <div className="min-h-screen  bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center flex-col">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-8 flex justify-between items-center text-center flex-col  ">
+          <h1 className="text-2xl font-bold text-gray-900 px-8 text-center">
             Client Management System
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-600 text-center">
             Manage your clients and geocode their addresses
           </p>
         </div>
@@ -274,7 +274,7 @@ export const HomePage: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Clients with Geocoding Issues ({clientsWithIssues.length})
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
               {clientsWithIssues.map((client) => (
                 <ClientCard
                   key={client.id}
@@ -341,7 +341,7 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
               {clients.map((client) => (
                 <ClientCard
                   key={client.id}
