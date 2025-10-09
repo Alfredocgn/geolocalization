@@ -20,6 +20,7 @@ export const HomePage: React.FC = () => {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [currentUploadId, setCurrentUploadId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     clients,
@@ -145,21 +146,40 @@ export const HomePage: React.FC = () => {
     return () => clearInterval(interval);
   }, [currentUploadId]);
 
+  // Filtrar clientes por término de búsqueda
+  const filterClients = (clientsList: Client[]) => {
+    if (!searchTerm.trim()) return clientsList;
+
+    const term = searchTerm.toLowerCase();
+    return clientsList.filter(
+      (client) =>
+        client.name.toLowerCase().includes(term) ||
+        client.lastName.toLowerCase().includes(term) ||
+        client.street.toLowerCase().includes(term) ||
+        client.city.toLowerCase().includes(term) ||
+        client.province.toLowerCase().includes(term) ||
+        client.country.toLowerCase().includes(term)
+    );
+  };
+
   const clientsWithIssues = clients.filter(
     (client) =>
       client.geocodingStatus === "failed" ||
       client.geocodingStatus === "ambiguous"
   );
 
+  const filteredClients = filterClients(clients);
+  const filteredClientsWithIssues = filterClients(clientsWithIssues);
+
   return (
     <div className="min-h-screen  bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center flex-col">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-8 flex justify-between items-center text-center flex-col  ">
+          <h1 className="text-2xl font-bold text-gray-900 px-8 text-center">
             Client Management System
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-600 text-center">
             Manage your clients and geocode their addresses
           </p>
         </div>
@@ -180,6 +200,47 @@ export const HomePage: React.FC = () => {
             </Button>
           )}
         </div>
+
+        {/* Search Bar */}
+        {clients.length > 0 && (
+          <div className="mb-6 max-w-2xl mx-auto">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="🔍 Search by name, address, city..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-3 pl-10 text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <svg
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="mt-2 text-sm text-gray-600 text-center">
+                Found {filteredClients.length} of {clients.length} clients
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Client Form Modal */}
         {showClientForm && (
@@ -269,13 +330,14 @@ export const HomePage: React.FC = () => {
         {clientsError && <ErrorAlert message={clientsError} type="error" />}
 
         {/* Clients with Issues Section */}
-        {clientsWithIssues.length > 0 && (
+        {filteredClientsWithIssues.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Clients with Geocoding Issues ({clientsWithIssues.length})
+              Clients with Geocoding Issues ({filteredClientsWithIssues.length}
+              {searchTerm && ` of ${clientsWithIssues.length}`})
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {clientsWithIssues.map((client) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+              {filteredClientsWithIssues.map((client) => (
                 <ClientCard
                   key={client.id}
                   client={client}
@@ -296,16 +358,28 @@ export const HomePage: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
-              All Clients ({clients.length})
+              All Clients ({filteredClients.length}
+              {searchTerm && ` of ${clients.length}`})
             </h2>
-            <Button
-              onClick={loadClients}
-              variant="secondary"
-              size="small"
-              loading={clientsLoading}
-            >
-              🔄 Update
-            </Button>
+            <div className="flex gap-2">
+              {searchTerm && (
+                <Button
+                  onClick={() => setSearchTerm("")}
+                  variant="secondary"
+                  size="small"
+                >
+                  ✕ Clear
+                </Button>
+              )}
+              <Button
+                onClick={loadClients}
+                variant="secondary"
+                size="small"
+                loading={clientsLoading}
+              >
+                🔄 Update
+              </Button>
+            </div>
           </div>
 
           {clientsLoading && clients.length === 0 ? (
@@ -340,9 +414,38 @@ export const HomePage: React.FC = () => {
                 </Button>
               </div>
             </div>
+          ) : filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No clients found
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                No clients match "{searchTerm}". Try a different search term.
+              </p>
+              <Button
+                onClick={() => setSearchTerm("")}
+                variant="secondary"
+                size="small"
+              >
+                Clear Search
+              </Button>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {clients.map((client) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+              {filteredClients.map((client) => (
                 <ClientCard
                   key={client.id}
                   client={client}

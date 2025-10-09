@@ -42,10 +42,10 @@ export const GeocodingOptionsSelector: React.FC<
   return (
     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
       <h4 className="font-medium text-yellow-800 mb-3">
-        Select the correct location:
+        Select the correct location ({results.length} options):
       </h4>
 
-      <div className="space-y-3 mb-4">
+      <div className="space-y-3 mb-4 max-h-[200px] overflow-y-auto pr-2">
         {results.map((result, index) => (
           <label
             key={index}
